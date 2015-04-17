@@ -50,8 +50,9 @@ public class ServerThread extends Thread {
 							for(String message : messages){
 								out.println(message);
 							}
+							out.println("\f");
 						} else {
-							out.println("No new messages");
+							out.println("null");
 						}
 					} else {
 						out.println("Unknown command");

@@ -23,15 +23,13 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 	private String btnString1 = "Login";
 	private String btnString2 = "Cancel";
 	
-	private Socket socket;
-	private PrintWriter out;
-	private BufferedReader in;
+	private Client parent;
 	
-	public LoginDialog(Frame frame, Socket socket, PrintWriter out, BufferedReader in){
-		super(frame, true);
-		this.socket = socket;
-		this.out = out;
-		this.in = in;
+	public LoginDialog(Client parent){
+		super(parent, true);
+		this.parent = parent;
+		
+		
 		
 		setTitle("Confirm Details");
 		
@@ -48,7 +46,7 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 		
 		Object[] options = {btnString1, btnString2};
 		
-		optionPane = new JOptionPane(array, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, 
+		optionPane = new JOptionPane(array, JOptionPane.PLAIN_MESSAGE, JOptionPane.YES_NO_OPTION, 
 				null, options, options[0]);
 		
 		setContentPane(optionPane);
@@ -67,14 +65,13 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 		});
 		
 		optionPane.addPropertyChangeListener(this);
+		
+		setLocationRelativeTo(parent);
+    	pack();
 	}
 	
 	public String getLoginName(){
 		return username;
-	}
-	
-	public Socket getSocket(){
-		return socket;
 	}
 	
 	@Override
@@ -96,7 +93,7 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 			}
 			
 			optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
-			
+			//TODO: returns username even when login fails
 			if(value.equals(btnString1)){
 				username = usernameInput.getText();
 				hostname = hostnameInput.getText();
@@ -119,12 +116,12 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 				else {
 					String fromServer = "";
 					try{
-						socket = new Socket(hostname, Integer.parseInt(port));
-						out = new PrintWriter(socket.getOutputStream(), true);
-						in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+						parent.socket = new Socket(hostname, Integer.parseInt(port));
+						parent.out = new PrintWriter(parent.socket.getOutputStream(), true);
+						parent.in = new BufferedReader(new InputStreamReader(parent.socket.getInputStream()));
 						
-						out.println("login " + username);
-						fromServer = in.readLine();
+						parent.out.println("login " + username);
+						fromServer = parent.in.readLine();
 						if(fromServer.equals("Login successful")){
 							clearAndHide();
 						} else {

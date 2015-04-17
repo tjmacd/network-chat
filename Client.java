@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -23,9 +25,12 @@ public class Client extends JFrame {
     private JButton sendButton;
     private JTextField sendToBox;
     
-    private PrintWriter out;
-    private BufferedReader in;
-    private Socket socket;
+    protected PrintWriter out;
+    protected BufferedReader in;
+    protected Socket socket;
+    
+    private StyledDocument doc;
+    private String username;
 	
     public Client(String title, Socket socket, PrintWriter outputStream, BufferedReader inputStream) {
     	super(title);
@@ -33,6 +38,7 @@ public class Client extends JFrame {
     	this.out = outputStream;
     	this.in = inputStream;
         initComponents();
+        login();
     }
 
     private void initComponents() {
@@ -52,6 +58,7 @@ public class Client extends JFrame {
 
         outputBox.setEditable(false);
         jScrollPane1.setViewportView(outputBox);
+        doc = (StyledDocument) outputBox.getDocument();
 
         jLabel1.setText("Send to:");
 
@@ -62,6 +69,8 @@ public class Client extends JFrame {
         sendButton.setText("Send");
 
         fetchButton.setText("Fetch");
+        
+     
 
         //Generated using NetBeans
         GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -120,9 +129,11 @@ public class Client extends JFrame {
 					label.setText("Please enter a message.");
 					inputBox.requestFocusInWindow();
 				} else {
-					out.println("send " + destination + message);
+					out.println("send " + destination + " " + message);
+					inputBox.setText("");
 					try {
 						label.setText(in.readLine());
+						print("To " + destination + ": " + message);
 					} catch (IOException e1) {
 						label.setText(e1.getMessage());
 						e1.printStackTrace();
@@ -130,6 +141,25 @@ public class Client extends JFrame {
 				}
 				
 			}	
+        });
+        
+        fetchButton.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		out.println("fetch");
+        		try{
+        		String fromServer = in.readLine();
+        		if(fromServer.equals("null")){
+        			label.setText("No new messages.");
+        		} else {
+        			print(fromServer);
+        			while(!((fromServer = in.readLine()).charAt(0) == '\f')){
+        				print(fromServer);
+        			}
+        		}
+        		} catch(IOException ex){
+        			ex.printStackTrace();
+        		}
+        	}
         });
 
         pack();
@@ -139,6 +169,25 @@ public class Client extends JFrame {
     	this.socket = socket;
     }
     
+    public void print(String text){
+    	try {
+			doc.insertString(doc.getLength(), "\n" + text, null);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public void login(){
+    	LoginDialog confirmDetails = new LoginDialog(this);
+    	confirmDetails.setVisible(true);
+    	this.username = confirmDetails.getLoginName();
+    	if(username != null){
+    		outputBox.setText("Logged in as " + username);
+    	} else {
+    		System.exit(0);
+    	}
+    }
+    
     public static void main(String[] args){
     	SwingUtilities.invokeLater(new Runnable() {
     		public void run() {
@@ -146,20 +195,14 @@ public class Client extends JFrame {
     	    	PrintWriter out = null;
     	    	BufferedReader in = null;
     	    	Client app = new Client("Chat Window", socket, out, in);
-    	    	LoginDialog confirmDetails = new LoginDialog(app, socket, out, in);
+    	    	
     	    	
     	    	app.setVisible(true);
-    	    	confirmDetails.setLocationRelativeTo(app);
-    	    	confirmDetails.pack();
-    	    	confirmDetails.setVisible(true);
+    	    	
     	    	
     	    
-    	    	String username = confirmDetails.getLoginName();
-    	    	if(username != null){
-    	    		app.outputBox.setText("Logged in as " + username);
-    	    	} else {
-    	    		System.exit(0);
-    	    	}
+    	    	
+    	    	
     	    	
     		}
     	});
