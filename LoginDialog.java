@@ -28,7 +28,7 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 	private BufferedReader in;
 	
 	public LoginDialog(Frame frame, Socket socket, PrintWriter out, BufferedReader in){
-		super(frame);
+		super(frame, true);
 		this.socket = socket;
 		this.out = out;
 		this.in = in;
@@ -48,7 +48,8 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 		
 		Object[] options = {btnString1, btnString2};
 		
-		optionPane = new JOptionPane(array, JOptionPane.PLAIN_MESSAGE, JOptionPane.YES_NO_OPTION, null, options, options[0]);
+		optionPane = new JOptionPane(array, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_OPTION, 
+				null, options, options[0]);
 		
 		setContentPane(optionPane);
 		
@@ -70,6 +71,10 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 	
 	public String getLoginName(){
 		return username;
+	}
+	
+	public Socket getSocket(){
+		return socket;
 	}
 	
 	@Override
@@ -98,7 +103,8 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 				port = portInput.getText();
 				
 				if(!username.matches("[\\w]+")){
-					JOptionPane.showMessageDialog(this, "Username is not valid. \nValid characters are letters, numerals and underscores.",
+					JOptionPane.showMessageDialog(this, "Username is not valid. "
+							+ "\nValid characters are letters, numerals and underscores.",
 							"Invalid Username", JOptionPane.ERROR_MESSAGE);
 					usernameInput.requestFocusInWindow();
 				} else if (hostname.equals("")){
@@ -131,7 +137,8 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 								"Could not connect", JOptionPane.ERROR_MESSAGE);
 					} catch(IOException e){
 						//System.err.println("Could not get I/O for the connection to " + hostname);
-						JOptionPane.showMessageDialog(this, "Could not get I/O for the connection to " + hostname + ".");
+						JOptionPane.showMessageDialog(this, "Could not get I/O for the connection to "
+								+ hostname + ".");
 					}
 					
 					
