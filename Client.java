@@ -61,6 +61,7 @@ public class Client extends JFrame {
         doc = (StyledDocument) outputBox.getDocument();
         //TODO: word wrap
         //TODO: Text formatting
+        //TODO: Enter sends message
 
         jLabel1.setText("Send to:");
 
@@ -73,7 +74,7 @@ public class Client extends JFrame {
         fetchButton.setText("Fetch");
         
      
-
+        //TODO: fix scroll bars
         //Generated using NetBeans
         GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -145,6 +146,7 @@ public class Client extends JFrame {
 			}	
         });
         
+        //TODO: number of messages retrieved
         fetchButton.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
         		out.println("fetch");
@@ -178,7 +180,7 @@ public class Client extends JFrame {
 			e.printStackTrace();
 		}
     }
-    
+    //TODO: make it so client window still appears (lowest priority)
     public void login(){
     	LoginDialog confirmDetails = new LoginDialog(this, configFile);
     	confirmDetails.setVisible(true);
@@ -200,12 +202,6 @@ public class Client extends JFrame {
     	    	
     	    	
     	    	app.setVisible(true);
-    	    	
-    	    	
-    	    
-    	    	
-    	    	
-    	    	
     		}
     	});
     	

@@ -1,16 +1,22 @@
 import java.net.*;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.LinkedList;
 import java.io.*;
 import java.util.regex.*;
 
 public class ServerThread extends Thread {
 	private Socket socket = null;
-	String name;
-	Mailbox mailbox;
+	private String name;
+	private Mailbox mailbox;
+	private PrintWriter toLog;
+	private Date date;
 	
-	public ServerThread(Socket socket, Mailbox mailbox) {
+	public ServerThread(Socket socket, Mailbox mailbox, PrintWriter log, Date date) {
 		this.socket = socket;
 		this.mailbox = mailbox;
+		this.toLog = log;
+		this.date = date;
 	}
 	
 	public void run() {
@@ -32,16 +38,15 @@ public class ServerThread extends Thread {
 						this.name = arg1;
 						if(name.equals("")){
 							out.println("Invalid username");
-							//socket.close();
 							break;
 						} else {
-							System.out.println(name + " logged in");
+							printToLog(name + " logged in");
 							out.println("Login successful");
 						}
 					} 
 					else if(command.equals("send")){
 						mailbox.send(arg1, name + ": " + arg2);
-						System.out.println(name + " to " + arg1 + ": "+ arg2);
+						printToLog(name + " to " + arg1 + ": "+ arg2);
 						out.println("Message sent");
 					} 
 					else if(command.equals("fetch")){
@@ -61,16 +66,24 @@ public class ServerThread extends Thread {
 					out.println("Invalid command");
 				}
 			}	
-			
 		} 
 		catch (IOException e) {
-			System.out.println(name + " disconnected");
+			printToLog(name + " disconnected");
 		}
 		
 		try {
 			socket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	private void printToLog(String output){
+		synchronized(toLog){
+			toLog.println(new Timestamp(date.getTime()) + " " + output);
+		}
+		synchronized(System.out){
+			System.out.println(output);
 		}
 	}
 }
