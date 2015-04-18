@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.awt.*;
 import java.awt.event.*;
@@ -14,6 +12,8 @@ import javax.swing.text.StyledDocument;
  * @author 100493250
  */
 public class Client extends JFrame {
+	
+	private File configFile = new File("login.cfg");
 
 	private JButton fetchButton;
     private JTextArea inputBox;
@@ -42,7 +42,7 @@ public class Client extends JFrame {
     }
 
     private void initComponents() {
-
+    	
         jScrollPane1 = new JScrollPane();
         outputBox = new JTextPane();
         jLabel1 = new JLabel();
@@ -59,6 +59,8 @@ public class Client extends JFrame {
         outputBox.setEditable(false);
         jScrollPane1.setViewportView(outputBox);
         doc = (StyledDocument) outputBox.getDocument();
+        //TODO: word wrap
+        //TODO: Text formatting
 
         jLabel1.setText("Send to:");
 
@@ -178,7 +180,7 @@ public class Client extends JFrame {
     }
     
     public void login(){
-    	LoginDialog confirmDetails = new LoginDialog(this);
+    	LoginDialog confirmDetails = new LoginDialog(this, configFile);
     	confirmDetails.setVisible(true);
     	this.username = confirmDetails.getLoginName();
     	if(username != null){

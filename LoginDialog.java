@@ -4,6 +4,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 
 import javax.swing.JDialog;
@@ -24,10 +26,12 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 	private String btnString2 = "Cancel";
 	
 	private Client parent;
+	private File config;
 	
-	public LoginDialog(Client parent){
+	public LoginDialog(Client parent, File config){
 		super(parent, true);
 		this.parent = parent;
+		this.config = config;
 		
 		
 		
@@ -65,6 +69,12 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 		});
 		
 		optionPane.addPropertyChangeListener(this);
+		
+		try {
+			readConfig();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
 		setLocationRelativeTo(parent);
     	pack();
@@ -136,9 +146,7 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 						//System.err.println("Could not get I/O for the connection to " + hostname);
 						JOptionPane.showMessageDialog(this, "Could not get I/O for the connection to "
 								+ hostname + ".");
-					}
-					
-					
+					}			
 				}
 			} else {
 				clearAndHide();
@@ -149,10 +157,54 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 	}
 	
 	public void clearAndHide() {
+		if(username != null){
+			writeConfig();
+		}
 		usernameInput.setText(null);
 		hostnameInput.setText(null);
 		portInput.setText(null);
 		setVisible(false);
 	}
 	
+	public void readConfig() throws IOException{
+		if(config.exists()){
+			String username = "";
+			String hostname = "";
+			String port = "";
+			BufferedReader fileIn = new BufferedReader(new FileReader(config));
+			String line = fileIn.readLine();
+			while(line != null){
+				String attribute;
+				String value;
+				Pattern pattern = Pattern.compile("([\\w]+)=(.+)");
+				Matcher matcher = pattern.matcher(line);
+				if(matcher.find()){
+					attribute = matcher.group(1).toUpperCase();
+					value = matcher.group(2);
+					if(attribute.equals("USERNAME")){
+						usernameInput.setText(value);
+					} else if (attribute.equals("HOSTNAME")){
+						hostnameInput.setText(value);
+					} else if (attribute.equals("PORT")){
+						portInput.setText(value);
+					}
+				}
+				line = fileIn.readLine();
+			}
+			fileIn.close();
+		}
+	}
+	
+	public void writeConfig()  {
+		try (PrintWriter fileOut = new PrintWriter(config)){
+			fileOut.println("username=" + username);
+			fileOut.println("hostname=" + hostname);
+			fileOut.println("port=" + port);
+			fileOut.close();
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+		
+	}
 }
