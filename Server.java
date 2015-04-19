@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.sql.Timestamp;
 import java.util.Date;
-//TODO: IMPORTANT: write to file
+
 public class Server {
 	
 	public static void main(String[] args) {

@@ -1,5 +1,4 @@
 import java.awt.event.*;
-import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.Socket;
@@ -32,8 +31,6 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 		super(parent, true);
 		this.parent = parent;
 		this.config = config;
-		
-		
 		
 		setTitle("Confirm Details");
 		
@@ -89,8 +86,6 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 		optionPane.setValue(btnString1);
 	}
 
-
-
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		String prop = event.getPropertyName();
@@ -103,13 +98,13 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 			}
 			
 			optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
-			//TODO: returns username even when login fails
+			
 			if(value.equals(btnString1)){
-				username = usernameInput.getText();
+				String temp_username = usernameInput.getText();
 				hostname = hostnameInput.getText();
 				port = portInput.getText();
 				
-				if(!username.matches("[\\w]+")){
+				if(!temp_username.matches("[\\w]+")){
 					JOptionPane.showMessageDialog(this, "Username is not valid. "
 							+ "\nValid characters are letters, numerals and underscores.",
 							"Invalid Username", JOptionPane.ERROR_MESSAGE);
@@ -130,20 +125,19 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 						parent.out = new PrintWriter(parent.socket.getOutputStream(), true);
 						parent.in = new BufferedReader(new InputStreamReader(parent.socket.getInputStream()));
 						
-						parent.out.println("login " + username);
+						parent.out.println("login " + temp_username);
 						fromServer = parent.in.readLine();
 						if(fromServer.equals("Login successful")){
+							username = temp_username;
 							clearAndHide();
 						} else {
 							JOptionPane.showMessageDialog(this, "Unable to log into server",
 									"Could not connect", JOptionPane.ERROR_MESSAGE);
 						}
 					} catch(UnknownHostException e){
-						//System.err.println("Host " + hostname + " cannot be found.");
 						JOptionPane.showMessageDialog(this, "Cannot connect to host " + hostname + ".",
 								"Could not connect", JOptionPane.ERROR_MESSAGE);
 					} catch(IOException e){
-						//System.err.println("Could not get I/O for the connection to " + hostname);
 						JOptionPane.showMessageDialog(this, "Could not get I/O for the connection to "
 								+ hostname + ".");
 					}			
@@ -168,9 +162,6 @@ class LoginDialog extends JDialog implements ActionListener, PropertyChangeListe
 	
 	public void readConfig() throws IOException{
 		if(config.exists()){
-			String username = "";
-			String hostname = "";
-			String port = "";
 			BufferedReader fileIn = new BufferedReader(new FileReader(config));
 			String line = fileIn.readLine();
 			while(line != null){

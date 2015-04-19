@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.Socket;
-import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -12,7 +11,6 @@ import javax.swing.text.StyledDocument;
  * @author 100493250
  */
 public class Client extends JFrame {
-	
 	private File configFile = new File("login.cfg");
 
 	private JButton fetchButton;
@@ -62,6 +60,7 @@ public class Client extends JFrame {
         //TODO: word wrap
         //TODO: Text formatting
         //TODO: Enter sends message
+        //TODO: autoscroll
 
         jLabel1.setText("Send to:");
 
@@ -73,8 +72,6 @@ public class Client extends JFrame {
 
         fetchButton.setText("Fetch");
         
-     
-        //TODO: fix scroll bars
         //Generated using NetBeans
         GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -119,54 +116,29 @@ public class Client extends JFrame {
                 .addComponent(label))
         );
         
+        inputBox.setLineWrap(true);
+        inputBox.setWrapStyleWord(true);
+        
+        
         sendButton.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String destination = sendToBox.getText();
-				String message = inputBox.getText();
-				if(destination.isEmpty()){
-					label.setText("You must enter a message recipient.");
-					sendToBox.requestFocusInWindow();
-				} else if (message.isEmpty()){
-					label.setText("Please enter a message.");
-					inputBox.requestFocusInWindow();
-				} else {
-					out.println("send " + destination + " " + message);
-					inputBox.setText("");
-					try {
-						label.setText(in.readLine());
-						print("To " + destination + ": " + message);
-					} catch (IOException e1) {
-						label.setText(e1.getMessage());
-						e1.printStackTrace();
-					}
-				}
+				sendMessage();
 				
 			}	
         });
         
-        //TODO: number of messages retrieved
         fetchButton.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		out.println("fetch");
-        		try{
-        		String fromServer = in.readLine();
-        		if(fromServer.equals("null")){
-        			label.setText("No new messages.");
-        		} else {
-        			print(fromServer);
-        			while(!((fromServer = in.readLine()).charAt(0) == '\f')){
-        				print(fromServer);
-        			}
-        		}
-        		} catch(IOException ex){
-        			ex.printStackTrace();
-        		}
+        		fetchMessage();
         	}
-        });
 
+			
+        });
+        
         pack();
+        setVisible(true);
     }
     
     public void setSocket(Socket socket){
@@ -179,8 +151,9 @@ public class Client extends JFrame {
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
+    	
     }
-    //TODO: make it so client window still appears (lowest priority)
+
     public void login(){
     	LoginDialog confirmDetails = new LoginDialog(this, configFile);
     	confirmDetails.setVisible(true);
@@ -192,6 +165,48 @@ public class Client extends JFrame {
     	}
     }
     
+    private void sendMessage(){
+    	String destination = sendToBox.getText();
+		String message = inputBox.getText();
+		if(destination.isEmpty()){
+			label.setText("You must enter a message recipient.");
+			sendToBox.requestFocusInWindow();
+		} else if (message.isEmpty()){
+			label.setText("Please enter a message.");
+			inputBox.requestFocusInWindow();
+		} else {
+			out.println("send " + destination + " " + message);
+			inputBox.setText("");
+			try {
+				label.setText(in.readLine());
+				print("To " + destination + ": " + message);
+			} catch (IOException e1) {
+				label.setText(e1.getMessage());
+				e1.printStackTrace();
+			}
+		}
+    }
+    
+    private void fetchMessage() {
+    	out.println("fetch");
+    	try{
+    		String fromServer = in.readLine();
+    		if(fromServer.equals("null")){
+    			label.setText("No new messages.");
+    		} else {
+    			print(fromServer);
+    			int count = 1;
+    			while(!((fromServer = in.readLine()).charAt(0) == '\f')){
+    				print(fromServer);
+    				count++;
+    			}
+    			label.setText(count + " messages retrieved");
+    		}
+    	} catch(IOException ex){
+    		ex.printStackTrace();
+    	}
+    }
+    
     public static void main(String[] args){
     	SwingUtilities.invokeLater(new Runnable() {
     		public void run() {
@@ -199,12 +214,7 @@ public class Client extends JFrame {
     	    	PrintWriter out = null;
     	    	BufferedReader in = null;
     	    	Client app = new Client("Chat Window", socket, out, in);
-    	    	
-    	    	
-    	    	app.setVisible(true);
     		}
-    	});
-    	
-    	
+    	});	
     }
 }
