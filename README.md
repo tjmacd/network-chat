@@ -19,11 +19,15 @@ To run the client:
 Typing `make run` will create an instance of a server and two clients.
 
 The server will output to the console.
+
 ![Server output](images/server_logging.PNG)
+
 When the client starts up it will ask for a username and the hostname and port of the server. Usernames must contain only alphanumeric characters and underscores. If the dialog is cancelled, the client will terminate. Upon successfully logging in, the three data will be stored in a file so they can be remembered for future logins.
+
 ![Login Dialog](images/login_with_info.PNG)
 
 The main client window contains a text output pane and two input fields. The user must imput the username of the message recipient in the field labelled `Send to:`. A message can then be typed in the lower pane and sent using the `Send` button. Messages intended for the user can be retrieved using the `Fetch` button. The client will automatically log out when the window is closed.
+
 ![Client](images/client_in_action.PNG)
 
 ## Future improvements
