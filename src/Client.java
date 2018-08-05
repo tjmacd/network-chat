@@ -7,8 +7,9 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 /**
+ * A Java Swing interface for the chat client
  *
- * @author 100493250
+ * @author TJ MacDougall
  */
 public class Client extends JFrame {
 	private File configFile = new File("login.cfg");
@@ -22,14 +23,21 @@ public class Client extends JFrame {
     private JTextPane outputBox;
     private JButton sendButton;
     private JTextField sendToBox;
-    
+
     protected PrintWriter out;
     protected BufferedReader in;
     protected Socket socket;
-    
+
     private StyledDocument doc;
     private String username;
-	
+
+	/**
+	 * Constructor
+	 * @param title        Title displayed in window
+	 * @param socket       The socket being used by the client
+	 * @param outputStream The text stream to send commands to the server
+	 * @param inputStream  The stream to recieve messages from the server
+	 */
     public Client(String title, Socket socket, PrintWriter outputStream, BufferedReader inputStream) {
     	super(title);
     	this.socket = socket;
@@ -39,8 +47,11 @@ public class Client extends JFrame {
         login();
     }
 
+	/**
+	 * Initializes all the Swing components
+	 */
     private void initComponents() {
-    	
+
         jScrollPane1 = new JScrollPane();
         outputBox = new JTextPane();
         jLabel1 = new JLabel();
@@ -71,7 +82,7 @@ public class Client extends JFrame {
         sendButton.setText("Send");
 
         fetchButton.setText("Fetch");
-        
+
         //Generated using NetBeans
         GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -115,45 +126,54 @@ public class Client extends JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(label))
         );
-        
+
         inputBox.setLineWrap(true);
         inputBox.setWrapStyleWord(true);
-        
-        
-        sendButton.addActionListener(new ActionListener() {
 
+		// Event listener for 'send' button
+        sendButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				sendMessage();
-				
-			}	
+
+			}
         });
-        
+
+		// Event listener for 'fetch' button
         fetchButton.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
         		fetchMessage();
         	}
-
-			
         });
-        
+
         pack();
         setVisible(true);
     }
-    
+
+	/**
+	 * Sets the socket to be used by this client
+	 * @param socket Socket object to be used by the client
+	 */
     public void setSocket(Socket socket){
     	this.socket = socket;
     }
-    
+
+	/**
+	 * Prints text to StyledDocument doc which is displayed in outputBox
+	 * @param text String text to be displayed in outputBox
+	 */
     public void print(String text){
     	try {
 			doc.insertString(doc.getLength(), "\n" + text, null);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
-    	
+
     }
 
+	/**
+	 * Displays a LoginDialog to log into the server
+	 */
     public void login(){
     	LoginDialog confirmDetails = new LoginDialog(this, configFile);
     	confirmDetails.setVisible(true);
@@ -164,7 +184,11 @@ public class Client extends JFrame {
     		System.exit(0);
     	}
     }
-    
+
+	/**
+	 * Sends a the message contained in inputBox to the server as a string
+	 * in the format: 'send [recipient] [message]'
+	 */
     private void sendMessage(){
     	String destination = sendToBox.getText();
 		String message = inputBox.getText();
@@ -186,7 +210,11 @@ public class Client extends JFrame {
 			}
 		}
     }
-    
+
+	/**
+	 * Recieves a String of multiple messages from the server intended for the
+	 * current username.
+	 */
     private void fetchMessage() {
     	out.println("fetch");
     	try{
@@ -196,6 +224,7 @@ public class Client extends JFrame {
     		} else {
     			print(fromServer);
     			int count = 1;
+				// Server sends Form Feed char '\f' to signal the end of the message list
     			while(!((fromServer = in.readLine()).charAt(0) == '\f')){
     				print(fromServer);
     				count++;
@@ -206,7 +235,7 @@ public class Client extends JFrame {
     		ex.printStackTrace();
     	}
     }
-    
+
     public static void main(String[] args){
     	SwingUtilities.invokeLater(new Runnable() {
     		public void run() {
@@ -215,6 +244,6 @@ public class Client extends JFrame {
     	    	BufferedReader in = null;
     	    	Client app = new Client("Chat Window", socket, out, in);
     		}
-    	});	
+    	});
     }
 }
